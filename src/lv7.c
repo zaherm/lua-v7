@@ -35,7 +35,7 @@ LUALIB_API int lv7_exec(lua_State *L) {
   lua_pushinteger(L, rc);
   switch(rc) {
     case V7_OK:
-      lua_pushstring(L, "RESULT");
+      lv7_pushvalue(L, p->v7, result);
       break;
     case V7_AST_TOO_LARGE:
       lua_pushstring(L, "AST too large");

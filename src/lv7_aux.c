@@ -47,3 +47,48 @@ void lv7_assert(lua_State *L, int cond, const char *msg)  {
   }
 }
 
+void lv7_pushvalue(lua_State *L, struct v7 *v7, v7_val_t value) {
+  if(v7_is_string(value)) {
+    size_t len;
+    const char *str = v7_get_string(v7, &value, &len);
+    lua_pushlstring(L, str, len);
+  }
+  else if(v7_is_boolean(value)) {
+    int b = v7_get_bool(v7, value);
+    lua_pushboolean(L, b);
+  }
+  else if(v7_is_number(value)) {
+    double d = v7_get_double(v7, value);
+    lua_pushnumber(L, d);
+  }
+  else if(v7_is_null(value) || v7_is_undefined(value)) {
+    lua_pushnil(L);
+  }
+  else if(v7_is_array(v7, value)) {
+    unsigned long length = v7_array_length(v7, value);
+    v7_val_t v;
+    unsigned long i;
+    lua_newtable(L);
+    for(i = 0; i < length; i++) {
+      v = v7_array_get(v7, value, i);
+      lv7_pushvalue(L, v7, v);
+      lua_rawseti(L,-2,i + 1);
+    }
+  }
+  else if(v7_is_object(value)) {
+    void *h = NULL;
+    v7_val_t name, val;
+    v7_prop_attr_t attrs;
+    lua_newtable(L);
+    while ((h = v7_next_prop(h, value, &name, &val, &attrs)) != NULL) {
+      lv7_pushvalue(L, v7, name);
+      lv7_pushvalue(L, v7, val);
+      lua_settable(L, -3);
+    }
+  }
+  else {
+    luaL_error(L, "unknown type");
+  }
+}
+
+
