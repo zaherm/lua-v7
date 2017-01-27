@@ -49,7 +49,7 @@ tests: $(all-tests)
 test/test_%: $T
 	lua $@.lua
 
-test: clean all tests
+test: all tests
 
 install: $(TARGET)
 
