@@ -25,32 +25,50 @@ LUALIB_API int lv7_destroy(lua_State *L) {
   return 0;
 }
 
-LUALIB_API int lv7_exec(lua_State *L) {
-  lv7 *p = lv7_check(L, 1);
-  const char *code = luaL_checkstring(L, 2);
-  enum v7_err rc = V7_OK;
+void lv7_pushresult(lua_State *L, struct v7 *v7, enum v7_err rc, v7_val_t result) {
   const char *err;
-  v7_val_t result;
-  rc = v7_exec(p->v7, code, &result);
   lua_pushinteger(L, rc);
   switch(rc) {
     case V7_OK:
-      lv7_pushvalue(L, p->v7, result);
+      lv7_pushvalue(L, v7, result);
       break;
     case V7_AST_TOO_LARGE:
       lua_pushstring(L, "AST too large");
       break;
     case V7_EXEC_EXCEPTION:
-      lua_pushstring(L, "Exception!");
+      //push the exception, accessible message via result.message
+      lv7_pushvalue(L, v7, result);
       break;
     case V7_SYNTAX_ERROR:
-      err = v7_get_parser_error(p->v7);
+      err = v7_get_parser_error(v7);
       lua_pushstring(L, err);
       break;
     case V7_INTERNAL_ERROR:
       lua_pushstring(L, "Internal Error");
       break;
   }
+}
+
+LUALIB_API int lv7_exec(lua_State *L) {
+  lv7 *p = lv7_check(L, 1);
+  const char *code = luaL_checkstring(L, 2);
+  enum v7_err rc = V7_OK;
+  v7_val_t result;
+  rc = v7_exec(p->v7, code, &result);
+  lv7_pushresult(L, p->v7, rc, result);
+  return 2;
+}
+
+LUALIB_API int lv7_apply(lua_State *L) {
+  lv7 *p = lv7_check(L, 1);
+  size_t flen;
+  const char *fname = luaL_checklstring(L, 2, &flen);
+  enum v7_err rc = V7_OK;
+  v7_val_t func, result, args;
+  func = v7_get(p->v7, v7_get_global(p->v7), fname, flen);
+  args = lv7_makeargs(L, p->v7);
+  rc = v7_apply(p->v7, func, v7_mk_undefined(), args, &result);
+  lv7_pushresult(L, p->v7, rc, result);
   return 2;
 }
 

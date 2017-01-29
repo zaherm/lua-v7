@@ -13,5 +13,6 @@ LUALIB_API int lv7_createmeta(lua_State *L, const char *name, const luaL_Reg *me
 void lv7_assert(lua_State *L, int cond, const char *msg);
 
 void lv7_pushvalue(lua_State *L, struct v7 *v7, v7_val_t value);
+v7_val_t lv7_makeargs(lua_State *L, struct v7 *v7);
 #endif
 

@@ -91,4 +91,71 @@ void lv7_pushvalue(lua_State *L, struct v7 *v7, v7_val_t value) {
   }
 }
 
+v7_val_t lv7_makevalue(lua_State *L, int index, struct v7 *v7) {
+  v7_val_t val;
+  int type = lua_type(L, index);
+  size_t vbool; double vnumber;
+  const char *vstring;
+  size_t vstring_len;
+  size_t vtable_len;
+  switch(type) {
+    case LUA_TBOOLEAN:
+      vbool = lua_toboolean(L, index);
+      val = v7_mk_boolean(v7, vbool);
+      break;
+    case LUA_TNUMBER:
+      vnumber = lua_tonumber(L, index);
+      val = v7_mk_number(v7, vnumber);
+      break;
+    case LUA_TSTRING:
+      vstring = lua_tolstring(L, index, &vstring_len);
+      val = v7_mk_string(v7, vstring, vstring_len, 1);
+      break;
+    case LUA_TNIL:
+      val = v7_mk_null();
+      break;
+    case LUA_TTABLE:
+      vtable_len = luaL_getn(L, index);
+      //object
+      if(vtable_len == 0) {
+        val = v7_mk_object(v7);
+        void *ud = (void *) 0;
+        v7_own(v7, &val);
+        lv7_assert(L, v7_get_user_data(v7, val) == NULL, "v7_get_user_data failed");
+        v7_set_user_data(v7, val, ud);
+        lv7_assert(L, v7_get_user_data(v7, val) == ud, "v7_get_user_data failed");
+        lua_pushnil(L);
+        while(lua_next(L, -2) != 0) {
+          size_t len;
+          const char *key = lua_tolstring(L, -2, &len);
+          v7_val_t tval = lv7_makevalue(L, -1, v7);
+          v7_set(v7, val, key, len, tval);
+          lua_pop(L, 1);
+        }
+      }
+      //array
+      else {
+        val = v7_mk_array(v7);
+        lua_pushnil(L);
+        while (lua_next(L, -2) != 0) {
+          v7_val_t aval = lv7_makevalue(L, -1, v7);
+          v7_array_push(v7, val, aval);
+          lua_pop(L, 1);
+        }
+      }
+      break;
+  }
+  return val;
+}
+
+v7_val_t lv7_makeargs(lua_State *L, struct v7 *v7) {
+  int argc = lua_gettop(L) + 1;
+  int i = 3;
+  v7_val_t args = v7_mk_array(v7);
+  for(; i < argc; i++) {
+    v7_val_t v = lv7_makevalue(L, i, v7);
+    v7_array_push(v7, args, v);
+  }
+  return args;
+}
 

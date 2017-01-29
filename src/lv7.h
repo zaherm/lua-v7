@@ -28,12 +28,14 @@ LUALIB_API int lv7_version(lua_State *L);
 LUALIB_API int lv7_create(lua_State *L);
 LUALIB_API int lv7_destroy(lua_State *L);
 LUALIB_API int lv7_exec(lua_State *L);
+LUALIB_API int lv7_apply(lua_State *L);
 
 void lv7_pushcodes(lua_State *L);
 
 static const luaL_Reg lv7_reg[] = {
   { "__gc", lv7_destroy },
   { "exec", lv7_exec },
+  { "apply", lv7_apply },
   {NULL, NULL}
 };
 
