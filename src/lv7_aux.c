@@ -115,7 +115,7 @@ v7_val_t lv7_makevalue(lua_State *L, int index, struct v7 *v7) {
       val = v7_mk_null();
       break;
     case LUA_TTABLE:
-      vtable_len = luaL_getn(L, index);
+      vtable_len = lua_objlen(L, index);
       //object
       if(vtable_len == 0) {
         val = v7_mk_object(v7);
