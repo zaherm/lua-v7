@@ -18,6 +18,7 @@ c:exec([[
   }
 ]])
 
+
 print(c:exec("sum(1,2)"))
 
 ok, res = c:exec([[
@@ -131,4 +132,6 @@ var reply = s.recv();
   })();
 ]])
 print(res.message)
+
+c:destroy()
 

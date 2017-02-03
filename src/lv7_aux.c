@@ -92,7 +92,7 @@ void lv7_pushvalue(lua_State *L, struct v7 *v7, v7_val_t value) {
 }
 
 v7_val_t lv7_makevalue(lua_State *L, int index, struct v7 *v7) {
-  v7_val_t val;
+  v7_val_t val = 0;
   int type = lua_type(L, index);
   size_t vbool; double vnumber;
   const char *vstring;
@@ -119,11 +119,6 @@ v7_val_t lv7_makevalue(lua_State *L, int index, struct v7 *v7) {
       //object
       if(vtable_len == 0) {
         val = v7_mk_object(v7);
-        void *ud = (void *) 0;
-        v7_own(v7, &val);
-        lv7_assert(L, v7_get_user_data(v7, val) == NULL, "v7_get_user_data failed");
-        v7_set_user_data(v7, val, ud);
-        lv7_assert(L, v7_get_user_data(v7, val) == ud, "v7_get_user_data failed");
         lua_pushnil(L);
         while(lua_next(L, -2) != 0) {
           size_t len;

@@ -5,7 +5,7 @@
 #include "lv7_aux.h"
 
 #define LV7_VERSION "lua-v7 0.0.1"
-#define LV7_COPYRIGHT "Copyright (C) 2017, Zaher Marzuq"
+#define LV7_COPYRIGHT "Copyright (c) 2017, Zaher Marzuq"
 #define LV7_DESCRIPTION "v7 binding for Lua"
 
 
@@ -36,6 +36,7 @@ static const luaL_Reg lv7_reg[] = {
   { "__gc", lv7_destroy },
   { "exec", lv7_exec },
   { "apply", lv7_apply },
+  { "destroy", lv7_destroy },
   {NULL, NULL}
 };
 
