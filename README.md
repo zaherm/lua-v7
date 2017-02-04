@@ -37,6 +37,7 @@ Return the v7 version as a string.
 code, result = v7:apply(func [, args])
 ==
 Invoke a global function in the v7 context.
+
   * params:
     * **func** (string) global function name
     * **args** (any) optional arguments, can be any lua type (except _function_)
